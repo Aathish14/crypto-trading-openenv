@@ -1,29 +1,24 @@
-[project]
+﻿project
 name = "crypto-trading-env"
 version = "0.1.0"
 description = "A cryptocurrency trading environment for reinforcement learning"
-authors = [
+authors = 
     {name = "OpenEnv Hackathon Participant"}
-]
-dependencies = [
+dependencies = 
     "numpy>=1.24.0",
     "pandas>=2.0.0",
     "gymnasium>=0.26.0",
     "openenv-core>=0.2.2",
     "uvicorn>=0.20.0",
     "fastapi>=0.100.0"
-]
-
-[project.urls]
+project.urls
 Homepage = "https://github.com/yourusername/crypto-trading-env"
-
-[project.scripts]
+project.scripts
 server = "server.app:main"
-
-[build-system]
-requires = ["setuptools>=61.0"]
+build-system
+requires = "setuptools>=61.0"
 build-backend = "setuptools.build_meta"
-
-[tool.openenv]
-environment_id = "CryptoTradingEnv-v0"tool.setuptools
+tool.openenv
+environment_id = "CryptoTradingEnv-v0"
+tool.setuptools
 packages = "crypto_trading_env"
