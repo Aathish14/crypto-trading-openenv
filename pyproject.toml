@@ -1,4 +1,4 @@
-[project]
+﻿[project]
 name = "crypto-trading-env"
 version = "0.1.0"
 description = "A cryptocurrency trading environment for reinforcement learning"
@@ -26,6 +26,3 @@ build-backend = "setuptools.build_meta"
 
 [tool.openenv]
 environment_id = "CryptoTradingEnv-v0"
-
-[tool.setuptools]
-packages = ["crypto_trading_env"]
