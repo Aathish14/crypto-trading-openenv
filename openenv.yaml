@@ -1,0 +1,92 @@
+name: crypto-trading-env
+title: Cryptocurrency Trading Environment
+description: A reinforcement learning environment for simulating cryptocurrency trading with multiple assets
+version: 0.1.0
+author: OpenEnv Hackathon Participant
+license: MIT
+tags:
+  - trading
+  - finance
+  - cryptocurrency
+  - reinforcement-learning
+environments:
+  - id: CryptoTradingEnv-v0
+    entry_point: crypto_trading_env.crypto_trading_env:CryptoTradingEnv
+    kwargs:
+      symbols: ['BTC-USD', 'ETH-USD', 'BNB-USD', 'XRP-USD', 'LTC-USD']
+      initial_balance: 10000
+      transaction_fee: 0.001
+      lookback_window: 10
+  - id: CryptoTradingEnv-Easy-v0
+    entry_point: crypto_trading_env.crypto_trading_env:CryptoTradingEnv
+    kwargs:
+      symbols: ['BTC-USD', 'ETH-USD']
+      initial_balance: 1000
+      transaction_fee: 0.001
+      lookback_window: 5
+  - id: CryptoTradingEnv-Medium-v0
+    entry_point: crypto_trading_env.crypto_trading_env:CryptoTradingEnv
+    kwargs:
+      symbols: ['BTC-USD', 'ETH-USD', 'BNB-USD']
+      initial_balance: 5000
+      transaction_fee: 0.001
+      lookback_window: 8
+  - id: CryptoTradingEnv-Hard-v0
+    entry_point: crypto_trading_env.crypto_trading_env:CryptoTradingEnv
+    kwargs:
+      symbols: ['BTC-USD', 'ETH-USD', 'BNB-USD', 'XRP-USD', 'LTC-USD', 'ADA-USD', 'DOT-USD']
+      initial_balance: 50000
+      transaction_fee: 0.001
+      lookback_window: 15
+rubrics:
+  - id: portfolio_return
+    type: signal
+    description: Portfolio return percentage
+    inputs:
+      - portfolio_value
+    outputs:
+      - reward
+    details: Reward based on portfolio return percentage change
+  - id: risk_adjusted_return
+    type: signal
+    description: Risk-adjusted portfolio return (Sharpe ratio like)
+    inputs:
+      - portfolio_value
+      - volatility
+    outputs:
+      - reward
+    details: Reward adjusted for risk (volatility)
+  - id: trade_efficiency
+    type: signal
+    description: Efficiency of trades (minimizing unnecessary trades)
+    inputs:
+      - num_trades
+      - portfolio_value
+    outputs:
+      - reward
+    details: Reward for achieving returns with fewer trades
+task_list:
+  - id: crypto_trading_basic
+    name: Basic Cryptocurrency Trading
+    description: Trade BTC and ETH with a small initial balance to learn basic trading concepts
+    environment_id: CryptoTradingEnv-Easy-v0
+    difficulty: easy
+    rubric_ids: [portfolio_return]
+    max_episode_steps: 100
+    success_threshold: 0.1  # 10% return
+  - id: crypto_trading_intermediate
+    name: Intermediate Cryptocurrency Trading
+    description: Trade multiple cryptocurrencies with moderate balance and position sizing
+    environment_id: CryptoTradingEnv-Medium-v0
+    difficulty: medium
+    rubric_ids: [portfolio_return, risk_adjusted_return]
+    max_episode_steps: 200
+    success_threshold: 0.25  # 25% return
+  - id: crypto_trading_advanced
+    name: Advanced Cryptocurrency Trading
+    description: Trade multiple cryptocurrencies with advanced strategies and risk management
+    environment_id: CryptoTradingEnv-Hard-v0
+    difficulty: hard
+    rubric_ids: [portfolio_return, risk_adjusted_return, trade_efficiency]
+    max_episode_steps: 300
+    success_threshold: 0.5  # 50% return
