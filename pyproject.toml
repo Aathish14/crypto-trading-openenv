@@ -25,4 +25,5 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.openenv]
-environment_id = "CryptoTradingEnv-v0"
+environment_id = "CryptoTradingEnv-v0"tool.setuptools
+packages = "crypto_trading_env"
