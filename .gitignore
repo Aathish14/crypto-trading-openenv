@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+.env
+.pytest_cache/
+.ruff_cache/
+*.log
+build_log.txt
+OpenEnvSession.md
+Pre-Submission Checklist.md
+Pre-Validation-Script.md
+Round-1.md
+Sample Inference Script.md
+Walkthrough.md
+implementation_plan.md
+task.md
+validation_report.md
+walkthrough.md
+uv.lock
+.ipynb_checkpoints/
+*.egg-info/
+dist/
+build/
+image.png
