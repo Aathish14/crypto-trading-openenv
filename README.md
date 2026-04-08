@@ -77,9 +77,9 @@ docker run -p 7860:7860 crypto-trading-env
 
 ### **Running Baseline Inference**
 Ensure the following environment variables are set:
-- `OPENAI_API_KEY`: Your OpenAI API key.
-- `API_BASE_URL`: (Optional) Custom API endpoint.
-- `MODEL_NAME`: (Optional) Model to use (default: gpt-3.5-turbo).
+- `OPENAI_API_KEY`: Your NVIDIA/OpenAI API key.
+- `API_BASE_URL`: NVIDIA endpoint (`https://integrate.api.nvidia.com/v1`).
+- `MODEL_NAME`: `nvidia/nemotron-3-super-120b-a12b`.
 
 ```bash
 python inference.py

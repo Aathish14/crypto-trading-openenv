@@ -18,11 +18,12 @@ from crypto_trading_env.crypto_trading_env import CryptoTradingEnv
 
 
 def run_baseline_inference():
-    """Run baseline inference using OpenAI API."""
+    """Run baseline inference using OpenAI-compatible API (NVIDIA Nemotron)."""
     # Get API credentials from environment variables
-    api_base_url = os.environ.get("API_BASE_URL", "https://api.openai.com/v1")
-    api_key = os.environ.get("OPENAI_API_KEY")  # Required for OpenAI
-    model_name = os.environ.get("MODEL_NAME", "gpt-3.5-turbo")
+    # Defaulting to NVIDIA's endpoint and Nemotron-3 model for high performance
+    api_base_url = os.environ.get("API_BASE_URL", "https://integrate.api.nvidia.com/v1")
+    api_key = os.environ.get("OPENAI_API_KEY")  # The spec requires this variable name
+    model_name = os.environ.get("MODEL_NAME", "nvidia/nemotron-3-super-120b-a12b")
 
     if not api_key:
         print("Warning: OPENAI_API_KEY environment variable not set.")
