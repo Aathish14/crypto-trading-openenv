@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Env | Dashboard</title>
+    <link rel="stylesheet" href="static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-blob blob-1"></div>
+    <div class="background-blob blob-2"></div>
+    
+    <main class="dashboard-container">
+        <header class="navbar">
+            <div class="logo">
+                <span class="icon">₿</span>
+                <h1>OpenEnv <span class="accent">Crypto</span></h1>
+            </div>
+            <div id="status-badge" class="badge idle">
+                <span class="dot"></span>
+                <span class="text">Checking Status...</span>
+            </div>
+        </header>
+
+        <section class="hero-section">
+            <div class="hero-content">
+                <h2>Trading Environment <span class="gradient-text">Dashboard</span></h2>
+                <p>Monitor your reinforcement learning environment and manage trading simulations in real-time.</p>
+            </div>
+            <div class="hero-actions">
+                <button id="start-btn" class="primary-btn">
+                    <span class="btn-icon">▶</span>
+                    Start Simulation
+                </button>
+            </div>
+        </section>
+
+        <div class="grid-layout">
+            <div class="card health-card">
+                <h3>System Health</h3>
+                <div id="health-stats" class="stats-list">
+                    <div class="placeholder-loader"></div>
+                </div>
+            </div>
+
+            <div class="card env-card">
+                <h3>Available Environments</h3>
+                <div id="env-list" class="stats-list">
+                    <div class="placeholder-loader"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2026 OpenEnv Hackathon | Built with ❤️ for Crypto Trading</p>
+        </footer>
+    </main>
+
+    <script src="static/app.js"></script>
+</body>
+</html>

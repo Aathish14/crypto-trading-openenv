@@ -3,6 +3,8 @@ OpenEnv server for the cryptocurrency trading environment.
 """
 
 import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from openenv.core import create_app, Action, Observation
 from crypto_trading_env.crypto_trading_env import CryptoTradingEnv
 
@@ -21,6 +23,14 @@ def main():
         observation_cls=Observation,
         env_name="crypto-trading-env",
     )
+
+    # Mount static files
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+
+    # Serve the dashboard at the root URL
+    @app.get("/")
+    async def read_index():
+        return FileResponse("static/index.html")
 
     import uvicorn
 
