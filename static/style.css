@@ -256,6 +256,42 @@ body {
     100% { background-position: -200% 0; }
 }
 
+/* Charts Section */
+.charts-section {
+    margin-bottom: var(--space-6);
+}
+
+.section-header {
+    margin-bottom: var(--space-3);
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+.chart-card h4 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-3);
+}
+
+.canvas-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.full-width .canvas-container {
+    height: 400px;
+}
+
 /* Footer */
 .footer {
     text-align: center;

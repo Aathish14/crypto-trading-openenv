@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="background-blob blob-1"></div>
@@ -53,6 +54,32 @@
                 </div>
             </div>
         </div>
+
+        <section class="charts-section">
+            <header class="section-header">
+                <h3>Performance Analysis</h3>
+            </header>
+            <div class="charts-grid">
+                <div class="card chart-card full-width">
+                    <h4>Portfolio Balance Over Time</h4>
+                    <div class="canvas-container">
+                        <canvas id="balanceChart"></canvas>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <h4>Step Rewards</h4>
+                    <div class="canvas-container">
+                        <canvas id="rewardChart"></canvas>
+                    </div>
+                </div>
+                <div class="card chart-card">
+                    <h4>Action Distribution</h4>
+                    <div class="canvas-container">
+                        <canvas id="actionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <footer class="footer">
             <p>&copy; 2026 OpenEnv Hackathon | Built with ❤️ for Crypto Trading</p>

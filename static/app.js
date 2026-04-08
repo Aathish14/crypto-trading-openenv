@@ -4,6 +4,107 @@ document.addEventListener('DOMContentLoaded', () => {
     const envList = document.getElementById('env-list');
     const startBtn = document.getElementById('start-btn');
 
+    // Chart Instances
+    let charts = {
+        balance: null,
+        reward: null,
+        action: null
+    };
+
+    // Chart.js Default Config
+    Chart.defaults.color = '#a1a1aa';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.08)';
+
+    function getChartConfig(type, label, data, color) {
+        return {
+            type: type,
+            data: {
+                labels: Array.from({length: data.length}, (_, i) => i),
+                datasets: [{
+                    label: label,
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: type === 'bar' ? color + '44' : 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.4,
+                    fill: type === 'bar'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: '#18181b',
+                        titleColor: '#ffffff',
+                        bodyColor: '#a1a1aa',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: { display: type === 'bar', grid: { display: false } },
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.04)' } }
+                }
+            }
+        };
+    }
+
+    function updateCharts(data) {
+        // Clear previous charts
+        Object.values(charts).forEach(chart => chart && chart.destroy());
+
+        // Balance Chart
+        charts.balance = new Chart(
+            document.getElementById('balanceChart'),
+            getChartConfig('line', 'Portfolio Balance', data.balance, '#3b82f6')
+        );
+
+        // Reward Chart
+        charts.reward = new Chart(
+            document.getElementById('rewardChart'),
+            getChartConfig('line', 'Step Reward', data.rewards, '#8b5cf6')
+        );
+
+        // Action Distribution Chart
+        const actionCounts = Array(9).fill(0);
+        data.actions.forEach(stepActions => {
+            stepActions.forEach(a => actionCounts[a]++);
+        });
+        
+        const actionLabels = ['Hold', 'B 25%', 'B 50%', 'B 75%', 'B 100%', 'S 25%', 'S 50%', 'S 75%', 'S 100%'];
+        
+        charts.action = new Chart(
+            document.getElementById('actionChart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: actionLabels,
+                    datasets: [{
+                        label: 'Action Frequency',
+                        data: actionCounts,
+                        backgroundColor: '#10b981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.04)' } }
+                    }
+                }
+            }
+        );
+    }
+
     // Start Button Interaction
     startBtn.addEventListener('click', async () => {
         const originalText = startBtn.innerHTML;
@@ -28,7 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const results = await response.json();
             console.log('Simulation Results:', results);
             
-            // Show success toast or alert
+            // Update Charts
+            updateCharts(results);
+            
+            // Show success alert
             const lastBalance = results.balance[results.balance.length - 1];
             alert(`Simulation Complete!\nFinal Portfolio Value: $${lastBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
             
