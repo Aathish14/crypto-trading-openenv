@@ -19,23 +19,23 @@ from crypto_trading_env.crypto_trading_env import CryptoTradingEnv
 
 def run_baseline_inference():
     """Run baseline inference using OpenAI-compatible API (NVIDIA Nemotron)."""
-    # Get API credentials from environment variables
-    # Defaulting to NVIDIA's endpoint and Nemotron-3 model for high performance
-    api_base_url = os.environ.get("API_BASE_URL", "https://integrate.api.nvidia.com/v1")
-    api_key = os.environ.get("OPENAI_API_KEY")  # The spec requires this variable name
-    model_name = os.environ.get("MODEL_NAME", "nvidia/nemotron-3-super-120b-a12b")
+    # Get API credentials from environment variables as required by the checklist
+    # Note: API_BASE_URL and MODEL_NAME have defaults, HF_TOKEN does not.
+    api_base_url = os.getenv("API_BASE_URL", "https://integrate.api.nvidia.com/v1")
+    model_name = os.getenv("MODEL_NAME", "nvidia/nemotron-3-super-120b-a12b")
+    hf_token = os.getenv("HF_TOKEN")
+    
+    # The hackathon spec accepts credentials via OPENAI_API_KEY or HF_TOKEN
+    api_key = os.getenv("OPENAI_API_KEY") or hf_token
 
     if not api_key:
-        print("Warning: OPENAI_API_KEY environment variable not set.")
+        print("Warning: Neither OPENAI_API_KEY nor HF_TOKEN environment variables set.")
         print("Using random actions as fallback.")
         use_llm = False
         client = None
     else:
-        # Initialize OpenAI client
-        if api_base_url == "https://api.openai.com/v1":
-            client = OpenAI(api_key=api_key)
-        else:
-            client = OpenAI(api_key=api_key, base_url=api_base_url)
+        # Initialize OpenAI client using the configured variables
+        client = OpenAI(api_key=api_key, base_url=api_base_url)
         use_llm = True
 
     print(f"Using API base URL: {api_base_url}")
