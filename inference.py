@@ -62,6 +62,7 @@ def run_baseline_inference():
     max_steps = 50  # Limit steps for demo
 
     print("Running episode...")
+    print("[START]")
     while step_count < max_steps:
         # Get current state information for description
         current_step = (
@@ -109,6 +110,7 @@ Portfolio Value: ${info["portfolio_value"]:.2f}
 
         print(f"  Reward: {reward:.4f}, Total Reward: {total_reward:.4f}")
         print(f"  Portfolio Value: ${info['portfolio_value']:.2f}")
+        print(f"[STEP] step={step_count} reward={reward:.4f} portfolio_value={info['portfolio_value']:.2f}")
 
         if terminated or truncated:
             print("Episode finished early!")
@@ -125,6 +127,8 @@ Portfolio Value: ${info["portfolio_value"]:.2f}
             (info["portfolio_value"] - env.initial_balance) / env.initial_balance * 100
         )
         print(f"Return: {return_pct:.2f}%")
+        
+    print(f"[END] total_reward={total_reward:.4f} steps={step_count} final_balance={info['portfolio_value']:.2f}")
 
     return {
         "total_reward": total_reward,
