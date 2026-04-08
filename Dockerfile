@@ -17,4 +17,4 @@ EXPOSE 8000
 ENV PYTHONUNBUFFERED=1
 
 # Run the server
-CMD ["uv", "run", "server"]
+CMD ["server"]
