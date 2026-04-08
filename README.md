@@ -19,10 +19,31 @@ tags:
 A complete, real-world reinforcement learning environment for multi-asset cryptocurrency trading, developed for the **OpenEnv Hackathon (Round 1)**.
 
 ## 🚀 Overview & Motivation
-In financial markets, making sequential decisions under uncertainty is a core challenge. This environment models a professional trading task: managing a portfolio of multiple cryptocurrencies (BTC, ETH, BNB, XRP, LTC) using high-frequency (5-minute) candle data. Unlike "toy" environments, this system incorporates:
-- **Multi-Asset Allocation**: Managing balance across multiple non-correlated assets.
-- **Transaction Costs**: A fixed 0.1% fee per trade, forcing the agent to learn trade efficiency.
-- **Realistic Data**: 5-minute OHLCV (Open, High, Low, Close, Volume) data structure.
+In financial markets, making sequential decisions under uncertainty is a core challenge. This environment models a professional trading task: managing a portfolio of multiple cryptocurrencies (BTC, ETH, BNB, XRP, LTC) using high-frequency (5-minute) candle data. 
+
+### **Key Features**
+- 💎 **Premium Glassmorphic UI**: High-fidelity dashboard for real-time monitoring.
+- 📉 **Interactive Analytics**: Time-series charts for balance, rewards, and action distribution.
+- ⚡ **Multi-Asset RL**: Native support for position sizing across 5 non-correlated assets.
+- ⚙️ **Dockerized Deployment**: Fully containerized and ready for Hugging Face Spaces.
+- 🏗️ **OpenEnv Compliant**: Strictly follows standard Gymnasium and OpenEnv interfaces.
+
+---
+
+## 🏗 Architecture
+This project follows a modern, full-stack RL architecture:
+
+```mermaid
+graph TD
+    A[Hugging Face Space] --> B[Docker Container]
+    B --> C[FastAPI Backend]
+    B --> E[Static Dashboard]
+    E --> F[Chart.js Visualization]
+    C --> D[CryptoTradingEnv]
+    D --> G[yfinance Data Loader]
+    H[Inference Script] --> C
+    H --> I[OpenAI / NVIDIA API]
+```
 
 ---
 
@@ -84,6 +105,21 @@ Ensure the following environment variables are set:
 ```bash
 python inference.py
 ```
+
+---
+
+## 📂 Project Structure
+```text
+├── crypto_trading_env/     # Core RL Environment logic (Gymnasium)
+├── static/                 # Frontend dashboard assets (HTML/CSS/JS)
+├── server/                 # FastAPI backend & Simulation API
+├── openenv.yaml            # Hackathon task definitions and rubrics
+├── inference.py            # LLM-based agent baseline script
+├── Dockerfile              # Container configuration for HF Spaces
+└── pyproject.toml          # Project dependencies (uv-compatible)
+```
+
+---
 
 ## 🌐 Dashboard
 The Space includes a built-in dashboard for visual validation:
