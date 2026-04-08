@@ -20,7 +20,7 @@ implementation_plan.md
 task.md
 validation_report.md
 walkthrough.md
-uv.lock
+# uv.lock removed
 .ipynb_checkpoints/
 *.egg-info/
 dist/
