@@ -5,18 +5,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('start-btn');
 
     // Start Button Interaction
-    startBtn.addEventListener('click', () => {
-        startBtn.innerHTML = '<span class="btn-icon">⏳</span> Starting...';
-        startBtn.style.opacity = '0.7';
+    startBtn.addEventListener('click', async () => {
+        const originalText = startBtn.innerHTML;
+        startBtn.innerHTML = '<span class="btn-icon">⏳</span> Simulating...';
+        startBtn.classList.add('loading');
         startBtn.disabled = true;
         
-        // Mock simulation start
-        setTimeout(() => {
-            alert('Simulation start logic will be implemented in the next phase!');
-            startBtn.innerHTML = '<span class="btn-icon">▶</span> Start Simulation';
-            startBtn.style.opacity = '1';
+        try {
+            const response = await fetch('/v1/simulate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    steps: 100,
+                    strategy: 'random'
+                })
+            });
+            
+            if (!response.ok) throw new Error('Simulation failed');
+            
+            const results = await response.json();
+            console.log('Simulation Results:', results);
+            
+            // Show success toast or alert
+            const lastBalance = results.balance[results.balance.length - 1];
+            alert(`Simulation Complete!\nFinal Portfolio Value: $${lastBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+            
+        } catch (error) {
+            console.error('Error starting simulation:', error);
+            alert('Error running simulation. Please check the console for details.');
+        } finally {
+            startBtn.innerHTML = originalText;
+            startBtn.classList.remove('loading');
             startBtn.disabled = false;
-        }, 1500);
+        }
     });
 
     // Helper to create stat item
