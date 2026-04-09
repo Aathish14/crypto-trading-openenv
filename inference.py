@@ -83,6 +83,8 @@ def run_baseline_inference():
         total_reward = 0
         step_count = 0
 
+        print(f"[START] task={task['id']}")
+
         while step_count < task["max_steps"]:
             balance = env.balance
             holdings = env.holdings.copy()
@@ -108,11 +110,11 @@ Goal: {task['kwargs'].get('goal_return', 0.1) * 100}%
             observation, reward, terminated, truncated, info = env.step(action)
             total_reward += reward
             step_count += 1
+            
+            print(f"[STEP] step={step_count} reward={reward:.4f}")
 
             if terminated or truncated:
                 break
-
-        print(f"[END] reward={total_reward:.4f} steps={step_count}")
 
         # ❗ CRITICAL FIX HERE
         raw_score = info.get("score", 0.5)
@@ -121,8 +123,11 @@ Goal: {task['kwargs'].get('goal_return', 0.1) * 100}%
         # ❗ HARD ASSERT (guarantees pass)
         assert 0 < score < 1, f"Invalid score detected: {score}"
 
-        # Reverted to standard format so Output Parser doesn't fail
-        print(f"\n[SCORE] task_id={task['id']} score={score:.6f}\n")
+        # Output the exact [END] tag format required by the parser
+        print(f"[END] task={task['id']} score={score:.6f} steps={step_count}\n")
+
+        # Reverted to standard format so Output Parser doesn't fail on legacy checks
+        print(f"[SCORE] task_id={task['id']} score={score:.6f}\n")
 
         # ❗ DOUBLE SAFETY (never trust upstream)
         all_results[task['id']] = safe_score(score)
