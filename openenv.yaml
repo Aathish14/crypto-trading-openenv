@@ -70,6 +70,7 @@ task_list:
     name: Basic Cryptocurrency Trading
     description: Trade BTC and ETH with a small initial balance to learn basic trading concepts
     environment_id: CryptoTradingEnv-Easy-v0
+    grader: crypto_trading_env.graders:BasicTradingGrader
     difficulty: easy
     rubric_ids: [portfolio_return]
     max_episode_steps: 100
@@ -78,6 +79,7 @@ task_list:
     name: Intermediate Cryptocurrency Trading
     description: Trade multiple cryptocurrencies with moderate balance and position sizing
     environment_id: CryptoTradingEnv-Medium-v0
+    grader: crypto_trading_env.graders:IntermediateTradingGrader
     difficulty: medium
     rubric_ids: [portfolio_return, risk_adjusted_return]
     max_episode_steps: 200
@@ -86,6 +88,7 @@ task_list:
     name: Advanced Cryptocurrency Trading
     description: Trade multiple cryptocurrencies with advanced strategies and risk management
     environment_id: CryptoTradingEnv-Hard-v0
+    grader: crypto_trading_env.graders:AdvancedTradingGrader
     difficulty: hard
     rubric_ids: [portfolio_return, risk_adjusted_return, trade_efficiency]
     max_episode_steps: 300
