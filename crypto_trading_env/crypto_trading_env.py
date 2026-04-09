@@ -23,6 +23,7 @@ class CryptoTradingEnv(gym.Env):
         initial_balance=10000,
         transaction_fee=0.001,
         lookback_window=10,
+        goal_return=0.10, # Goal return percentage for the task (0.1 means 10%)
     ):
         """
         Initialize the cryptocurrency trading environment.
@@ -33,6 +34,7 @@ class CryptoTradingEnv(gym.Env):
             initial_balance: Starting portfolio balance in USD
             transaction_fee: Fee percentage per trade (default: 0.001 = 0.1%)
             lookback_window: Number of past observations to include in state
+            goal_return: Target percentage return for task success (e.g. 0.10 for 10%)
         """
         super(CryptoTradingEnv, self).__init__()
 
@@ -41,6 +43,7 @@ class CryptoTradingEnv(gym.Env):
         self.initial_balance = initial_balance
         self.transaction_fee = transaction_fee
         self.lookback_window = lookback_window
+        self.goal_return = goal_return
 
         # Action space: For each asset, we can choose:
         # 0: Hold (0% of balance)
@@ -208,6 +211,7 @@ class CryptoTradingEnv(gym.Env):
             "portfolio_value": self.portfolio_value,
             "balance": self.balance,
             "holdings": self.holdings.copy(),
+            "score": 0.01, # Strict lower bound per guidelines
         }
 
         return observation, info
@@ -244,12 +248,20 @@ class CryptoTradingEnv(gym.Env):
         # Get new observation
         observation = self._get_observation()
 
+        # Calculate strict Phase 2 score (0, 1) mapping progress to goal
+        total_return = (self.portfolio_value - self.initial_balance) / self.initial_balance
+        progress = max(0.0, total_return) / max(0.001, self.goal_return)
+        
+        # Enforce strict bounds [0.01, 0.99]
+        score = 0.01 + 0.98 * min(1.0, progress)
+        score = float(np.clip(score, 0.01, 0.99))
+
         info = {
             "portfolio_value": self.portfolio_value,
             "balance": self.balance,
             "holdings": self.holdings.copy(),
-            "total_return": (self.portfolio_value - self.initial_balance)
-            / self.initial_balance,
+            "total_return": total_return,
+            "score": score,
         }
 
         return observation, reward, terminated, truncated, info

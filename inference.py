@@ -1,202 +1,156 @@
 """
 Baseline inference script for the cryptocurrency trading environment.
-Uses OpenAI API to run a model against the environment.
+Uses OpenAI API to run a model against all 3 defined environments.
 """
 
 import os
+import yaml
 import numpy as np
 import sys
 
-# Try to import openai, if not available, install it
 try:
     from openai import OpenAI
 except ImportError:
     print("Error: openai package not found. Please ensure it is installed.")
-    raise
+    sys.exit(1)
 
 from crypto_trading_env.crypto_trading_env import CryptoTradingEnv
 
+def load_tasks():
+    with open("openenv.yaml", "r") as f:
+        config = yaml.safe_load(f)
+        
+    tasks = []
+    for task in config.get("task_list", []):
+        env_def = None
+        for env in config.get("environments", []):
+            if env["id"] == task["environment_id"]:
+                env_def = env
+                break
+        
+        if env_def:
+            kwargs = env_def.get("kwargs", {}).copy()
+            # Feed the task's success threshold as the goal_return to the environment
+            kwargs["goal_return"] = task.get("success_threshold", 0.1)
+            tasks.append({
+                "id": task["id"],
+                "name": task["name"],
+                "difficulty": task["difficulty"],
+                "kwargs": kwargs,
+                "max_steps": min(15, task.get("max_episode_steps", 50)) # Cap for fast demo
+            })
+    return tasks
 
 def run_baseline_inference():
     """Run baseline inference using OpenAI-compatible API (NVIDIA Nemotron)."""
-    # Get API credentials from environment variables as required by the checklist
-    # Note: API_BASE_URL and MODEL_NAME have defaults, HF_TOKEN does not.
     api_base_url = os.getenv("API_BASE_URL", "https://integrate.api.nvidia.com/v1")
     model_name = os.getenv("MODEL_NAME", "nvidia/nemotron-3-super-120b-a12b")
     hf_token = os.getenv("HF_TOKEN")
     
-    # The hackathon spec accepts credentials via OPENAI_API_KEY or HF_TOKEN
     api_key = os.getenv("OPENAI_API_KEY") or hf_token
 
     if not api_key:
         print("Warning: Neither OPENAI_API_KEY nor HF_TOKEN environment variables set.")
-        print("Using random actions as fallback.")
         use_llm = False
         client = None
     else:
-        # Initialize OpenAI client using the configured variables
         client = OpenAI(api_key=api_key, base_url=api_base_url)
         use_llm = True
 
     print(f"Using API base URL: {api_base_url}")
-    print(f"Using model: {model_name}")
+    print(f"Using model: {model_name}\n")
 
-    # Create environment
-    print("Creating environment...")
-    env = CryptoTradingEnv(
-        symbols=["BTC-USD", "ETH-USD"],  # Simplified for faster inference
-        initial_balance=1000,
-        transaction_fee=0.001,
-        lookback_window=5,
-    )
+    tasks = load_tasks()
+    if not tasks:
+        print("Error: No tasks loaded from openenv.yaml")
+        sys.exit(1)
 
-    # Reset environment
-    print("Resetting environment...")
-    observation, info = env.reset()
-    print(f"Initial observation shape: {observation.shape}")
-    print(f"Initial portfolio value: ${info['portfolio_value']:.2f}")
+    print(f"Loaded {len(tasks)} tasks for evaluation.\n")
+    
+    all_results = {}
 
-    # Run episode
-    total_reward = 0
-    step_count = 0
-    max_steps = 50  # Limit steps for demo
-
-    print("Running episode...")
-    print("[START]")
-    while step_count < max_steps:
-        # Get current state information for description
-        current_step = (
-            env.current_step - env.lookback_window
-        )  # Adjust for lookback window
-        balance = env.balance
-        holdings = env.holdings.copy()
-
-        # Get current prices
-        try:
+    for t_idx, task in enumerate(tasks):
+        print("="*50)
+        print(f"TASK {t_idx+1}/{len(tasks)}: {task['name']} ({task['difficulty']})")
+        print("="*50)
+        
+        env = CryptoTradingEnv(**task["kwargs"])
+        observation, info = env.reset()
+        
+        total_reward = 0
+        step_count = 0
+        
+        print("[START]")
+        
+        while step_count < task["max_steps"]:
+            balance = env.balance
+            holdings = env.holdings.copy()
             current_prices = env._get_current_prices()
-        except Exception as e:
-            print(f"Error getting current prices: {e}")
-            current_prices = np.zeros(len(env.symbols))
 
-        # Create description for LLM
-        obs_description = f"""
+            obs_description = f"""
 Step: {step_count}
 Balance: ${balance:.2f}
 Holdings: {dict(zip(env.symbols, holdings))}
 Current Prices: {dict(zip(env.symbols, current_prices))}
 Portfolio Value: ${info["portfolio_value"]:.2f}
+Goal Return: {task['kwargs'].get('goal_return', 0.1) * 100}%
 """
 
-        # Choose action
-        if use_llm:
-            try:
-                action = get_llm_action(
-                    obs_description, model_name, env.symbols, client
-                )
-            except Exception as e:
-                print(f"Error getting LLM action: {e}")
-                # Fallback to random action
+            if use_llm:
+                try:
+                    action = get_llm_action(obs_description, model_name, env.symbols, client)
+                except Exception as e:
+                    print(f"Error getting LLM action: {e}")
+                    action = env.action_space.sample()
+            else:
                 action = env.action_space.sample()
-        else:
-            # Random action
-            action = env.action_space.sample()
 
-        print(f"Step {step_count + 1}: Taking action {action}")
+            observation, reward, terminated, truncated, info = env.step(action)
+            total_reward += reward
+            step_count += 1
+            
+            print(f"[STEP] step={step_count} reward={reward:.4f} portfolio_value={info['portfolio_value']:.2f}")
 
-        # Take step in environment
-        observation, reward, terminated, truncated, info = env.step(action)
-        total_reward += reward
-        step_count += 1
-
-        print(f"  Reward: {reward:.4f}, Total Reward: {total_reward:.4f}")
-        print(f"  Portfolio Value: ${info['portfolio_value']:.2f}")
-        print(f"[STEP] step={step_count} reward={reward:.4f} portfolio_value={info['portfolio_value']:.2f}")
-
-        if terminated or truncated:
-            print("Episode finished early!")
-            break
-
-    # Final results
-    print("\n=== BASELINE INFERENCE RESULTS ===")
-    print(f"Total steps: {step_count}")
-    print(f"Total reward: {total_reward:.4f}")
-    print(f"Final portfolio value: ${info['portfolio_value']:.2f}")
-    print(f"Initial balance: ${env.initial_balance:.2f}")
-    if info["portfolio_value"] > 0:
-        return_pct = (
-            (info["portfolio_value"] - env.initial_balance) / env.initial_balance * 100
-        )
-        print(f"Return: {return_pct:.2f}%")
+            if terminated or truncated:
+                break
+                
+        print(f"[END] total_reward={total_reward:.4f} steps={step_count} final_balance={info['portfolio_value']:.2f}")
         
-    print(f"[END] total_reward={total_reward:.4f} steps={step_count} final_balance={info['portfolio_value']:.2f}")
-
-    return {
-        "total_reward": total_reward,
-        "final_portfolio_value": info["portfolio_value"],
-        "steps": step_count,
-        "initial_balance": env.initial_balance,
-    }
-
+        # Extract the score from info (which we mapped strictly to 0.01 - 0.99)
+        score = info.get("score", 0.01)
+        print(f"\n[SCORE] task_id={task['id']} score={score:.4f}\n")
+        all_results[task['id']] = score
+        
+    print("=== FINAL BASELINE EVALUATION SCORES ===")
+    for task_id, score in all_results.items():
+        print(f"- {task_id}: {score:.4f}")
 
 def get_llm_action(obs_description, model_name, symbols, client):
     """Get action from LLM based on observation description."""
     prompt = f"""
-You are a cryptocurrency trading agent. Your goal is to maximize portfolio value through strategic trading.
-
-Current observation:
+You are a cryptocurrency trading agent.
+Current state:
 {obs_description}
 
-Available actions for each asset ({", ".join(symbols)}):
-0: Hold
-1: Buy 25% of balance
-2: Buy 50% of balance
-3: Buy 75% of balance
-4: Buy 100% of balance
-5: Sell 25% of holdings
-6: Sell 50% of holdings
-7: Sell 75% of holdings
-8: Sell 100% of holdings
-
-Based on the current market conditions and your portfolio state, choose actions for each asset.
-Provide your answer as a comma-separated list of integers (one per asset, in the same order as the assets listed above).
-For example, if there are 2 assets (BTC-USD, ETH-USD), you might return "1,3" for Buy 25% BTC, Buy 75% ETH.
-
-Your action (comma-separated integers, one per asset):
+Provide a comma-separated list of integers (0-8) for each asset ({", ".join(symbols)}).
+0=Hold, 1-4=Buy(25%-100%), 5-8=Sell(25%-100%).
+Your action:
 """
-
     response = client.chat.completions.create(
         model=model_name,
-        messages=[
-            {"role": "system", "content": "You are a cryptocurrency trading agent."},
-            {"role": "user", "content": prompt},
-        ],
+        messages=[{"role": "user", "content": prompt}],
         max_tokens=10,
         temperature=0.7,
     )
-
     action_text = response.choices[0].message.content.strip()
-    print(f"LLM raw response: '{action_text}'")
-
-    # Parse the response to get actions
     try:
         actions = [int(x.strip()) for x in action_text.split(",")]
-        # Ensure we have the correct number of actions
-        if len(actions) != len(symbols):
-            # If wrong number, repeat the first action or truncate
-            if len(actions) < len(symbols):
-                actions = actions + [actions[-1]] * (len(symbols) - len(actions))
-            else:
-                actions = actions[: len(symbols)]
-        # Ensure actions are in valid range
-        actions = [max(0, min(8, a)) for a in actions]
-    except (ValueError, AttributeError):
-        # Fallback to hold actions if parsing fails
-        actions = [0] * len(symbols)
-
-    # Convert to the format expected by our environment (MultiDiscrete)
-    # Our environment expects a numpy array of actions for each asset
-    return np.array(actions)
-
+        if len(actions) < len(symbols):
+            actions = actions + [0] * (len(symbols) - len(actions))
+        actions = actions[:len(symbols)]
+        return np.array([max(0, min(8, a)) for a in actions])
+    except:
+        return np.array([0] * len(symbols))
 
 if __name__ == "__main__":
     run_baseline_inference()
