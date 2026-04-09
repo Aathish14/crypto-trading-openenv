@@ -121,7 +121,8 @@ Goal: {task['kwargs'].get('goal_return', 0.1) * 100}%
         # ❗ HARD ASSERT (guarantees pass)
         assert 0 < score < 1, f"Invalid score detected: {score}"
 
-        print(f"[SCORE] {task['id']} = {score:.6f}\n")
+        # Reverted to standard format so Output Parser doesn't fail
+        print(f"\n[SCORE] task_id={task['id']} score={score:.6f}\n")
 
         # ❗ DOUBLE SAFETY (never trust upstream)
         all_results[task['id']] = safe_score(score)
