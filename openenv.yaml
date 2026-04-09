@@ -39,57 +39,37 @@ environments:
       transaction_fee: 0.001
       lookback_window: 15
 rubrics:
-  - id: portfolio_return
-    type: signal
-    description: Portfolio return percentage
-    inputs:
-      - portfolio_value
-    outputs:
-      - reward
-    details: Reward based on portfolio return percentage change
-  - id: risk_adjusted_return
-    type: signal
-    description: Risk-adjusted portfolio return (Sharpe ratio like)
-    inputs:
-      - portfolio_value
-      - volatility
-    outputs:
-      - reward
-    details: Reward adjusted for risk (volatility)
-  - id: trade_efficiency
-    type: signal
-    description: Efficiency of trades (minimizing unnecessary trades)
-    inputs:
-      - num_trades
-      - portfolio_value
-    outputs:
-      - reward
-    details: Reward for achieving returns with fewer trades
+  - id: basic_grader
+    type: grader
+    entry_point: crypto_trading_env.graders:BasicTradingGrader
+  - id: intermediate_grader
+    type: grader
+    entry_point: crypto_trading_env.graders:IntermediateTradingGrader
+  - id: advanced_grader
+    type: grader
+    entry_point: crypto_trading_env.graders:AdvancedTradingGrader
 task_list:
   - id: crypto_trading_basic
     name: Basic Cryptocurrency Trading
     description: Trade BTC and ETH with a small initial balance to learn basic trading concepts
     environment_id: CryptoTradingEnv-Easy-v0
-    grader: crypto_trading_env.graders:BasicTradingGrader
     difficulty: easy
-    rubric_ids: [portfolio_return]
+    rubric_ids: [basic_grader]
     max_episode_steps: 100
     success_threshold: 0.1  # 10% return
   - id: crypto_trading_intermediate
     name: Intermediate Cryptocurrency Trading
     description: Trade multiple cryptocurrencies with moderate balance and position sizing
     environment_id: CryptoTradingEnv-Medium-v0
-    grader: crypto_trading_env.graders:IntermediateTradingGrader
     difficulty: medium
-    rubric_ids: [portfolio_return, risk_adjusted_return]
+    rubric_ids: [intermediate_grader]
     max_episode_steps: 200
     success_threshold: 0.25  # 25% return
   - id: crypto_trading_advanced
     name: Advanced Cryptocurrency Trading
     description: Trade multiple cryptocurrencies with advanced strategies and risk management
     environment_id: CryptoTradingEnv-Hard-v0
-    grader: crypto_trading_env.graders:AdvancedTradingGrader
     difficulty: hard
-    rubric_ids: [portfolio_return, risk_adjusted_return, trade_efficiency]
+    rubric_ids: [advanced_grader]
     max_episode_steps: 300
     success_threshold: 0.5  # 50% return
